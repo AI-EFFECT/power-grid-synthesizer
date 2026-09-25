@@ -55,8 +55,7 @@
 <li class="toctree-l3"><a class="reference internal" href="examples/GenLoadSettings.html">Generation and Load Settings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="examples/SynthesizePypowsybl.html">Synthesis with pypowsybl</a></li>
 <li class="toctree-l3"><a class="reference internal" href="examples/IEEETest.html">IEEE Test</a></li>
-<li class="toctree-l3"><a class="reference internal" href="examples/Pegase9241Test.html">PEGASE 9241 Test</a></li>
-<li class="toctree-l3"><a class="reference internal" href="examples/RTE7000Test.html">RTE 7000 Test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="examples/NonReverseEngineerability.html">Non-Reverse-Engineerability Study</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="examples/distribution.html">Distribution</a><ul>
@@ -85,6 +84,7 @@
 <li class="toctree-l3"><a class="reference internal" href="theory/distribution_feeder_generation.html">Distribution Feeder Generation</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="theory/perturbation.html">Protecting the reference grid</a></li>
 </ul>
 </li>
 </ul>
@@ -109,6 +109,16 @@
 <li class="toctree-l4"><a class="reference internal" href="autoapi/powergrid_synth/distribution/distribution_synthesis/index.html">powergrid_synth.distribution.distribution_synthesis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/powergrid_synth/distribution/distribution_validation/index.html">powergrid_synth.distribution.distribution_validation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/powergrid_synth/distribution/synthesize/index.html">powergrid_synth.distribution.synthesize</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/powergrid_synth/privacy/index.html">powergrid_synth.privacy</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/powergrid_synth/privacy/engine/index.html">powergrid_synth.privacy.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/powergrid_synth/privacy/noise/index.html">powergrid_synth.privacy.noise</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/powergrid_synth/privacy/recovery/index.html">powergrid_synth.privacy.recovery</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/powergrid_synth/privacy/registry/index.html">powergrid_synth.privacy.registry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/powergrid_synth/privacy/report/index.html">powergrid_synth.privacy.report</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/powergrid_synth/privacy/rng/index.html">powergrid_synth.privacy.rng</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/powergrid_synth/privacy/settings/index.html">powergrid_synth.privacy.settings</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/powergrid_synth/transmission/index.html">powergrid_synth.transmission</a><ul>
@@ -213,28 +223,28 @@
 <p>The high-level <code class="docutils literal notranslate"><span class="pre">synthesize()</span></code> function runs the entire CLC transmission pipeline in one call:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">powergrid_synth</span><span class="w"> </span><span class="kn">import</span> <span class="n">synthesize</span>
 
-<span class="c1"># Mode I — clone an existing grid&#39;s statistical profile</span>
+<span class="c1"># Mode I — clone an existing grid's statistical profile</span>
 <span class="n">grid</span> <span class="o">=</span> <span class="n">synthesize</span><span class="p">(</span>
-    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;reference&quot;</span><span class="p">,</span>
-    <span class="n">reference_case</span><span class="o">=</span><span class="s2">&quot;case118&quot;</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">"reference"</span><span class="p">,</span>
+    <span class="n">reference_case</span><span class="o">=</span><span class="s2">"case118"</span><span class="p">,</span>
     <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
-    <span class="n">export_formats</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;cgmes&quot;</span><span class="p">,</span> <span class="s2">&quot;matpower&quot;</span><span class="p">],</span>
+    <span class="n">export_formats</span><span class="o">=</span><span class="p">[</span><span class="s2">"json"</span><span class="p">,</span> <span class="s2">"cgmes"</span><span class="p">,</span> <span class="s2">"matpower"</span><span class="p">],</span>
 <span class="p">)</span>
 
 <span class="c1"># Mode II — fully synthetic from user-specified parameters</span>
 <span class="n">grid</span> <span class="o">=</span> <span class="n">synthesize</span><span class="p">(</span>
-    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;synthetic&quot;</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">"synthetic"</span><span class="p">,</span>
     <span class="n">level_specs</span><span class="o">=</span><span class="p">[</span>
-        <span class="p">{</span><span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>  <span class="s2">&quot;avg_k&quot;</span><span class="p">:</span> <span class="mf">3.5</span><span class="p">,</span> <span class="s2">&quot;diam&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;dist_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dgln&quot;</span><span class="p">},</span>
-        <span class="p">{</span><span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span> <span class="s2">&quot;avg_k&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;diam&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span> <span class="s2">&quot;dist_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dpl&quot;</span><span class="p">},</span>
-        <span class="p">{</span><span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="s2">&quot;avg_k&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s2">&quot;diam&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">&quot;dist_type&quot;</span><span class="p">:</span> <span class="s2">&quot;poisson&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"n"</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>  <span class="s2">"avg_k"</span><span class="p">:</span> <span class="mf">3.5</span><span class="p">,</span> <span class="s2">"diam"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">"dist_type"</span><span class="p">:</span> <span class="s2">"dgln"</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"n"</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span> <span class="s2">"avg_k"</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">"diam"</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span> <span class="s2">"dist_type"</span><span class="p">:</span> <span class="s2">"dpl"</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"n"</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="s2">"avg_k"</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s2">"diam"</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">"dist_type"</span><span class="p">:</span> <span class="s2">"poisson"</span><span class="p">},</span>
     <span class="p">],</span>
     <span class="n">connection_specs</span><span class="o">=</span><span class="p">{</span>
-        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;k-stars&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mf">0.174</span><span class="p">,</span> <span class="s2">&quot;gamma&quot;</span><span class="p">:</span> <span class="mf">4.15</span><span class="p">},</span>
-        <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;k-stars&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mf">0.15</span><span class="p">,</span>  <span class="s2">&quot;gamma&quot;</span><span class="p">:</span> <span class="mf">4.15</span><span class="p">},</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"k-stars"</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">:</span> <span class="mf">0.174</span><span class="p">,</span> <span class="s2">"gamma"</span><span class="p">:</span> <span class="mf">4.15</span><span class="p">},</span>
+        <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"k-stars"</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">:</span> <span class="mf">0.15</span><span class="p">,</span>  <span class="s2">"gamma"</span><span class="p">:</span> <span class="mf">4.15</span><span class="p">},</span>
     <span class="p">},</span>
     <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
-    <span class="n">export_formats</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;matpower&quot;</span><span class="p">],</span>
+    <span class="n">export_formats</span><span class="o">=</span><span class="p">[</span><span class="s2">"json"</span><span class="p">,</span> <span class="s2">"matpower"</span><span class="p">],</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -251,13 +261,13 @@
 
 <span class="c1"># 1. Configure voltage levels and inter-level connections</span>
 <span class="n">level_specs</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">{</span><span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>  <span class="s1">&#39;avg_k&#39;</span><span class="p">:</span> <span class="mf">3.5</span><span class="p">,</span> <span class="s1">&#39;diam&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;dist_type&#39;</span><span class="p">:</span> <span class="s1">&#39;dgln&#39;</span><span class="p">},</span>
-    <span class="p">{</span><span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span> <span class="s1">&#39;avg_k&#39;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s1">&#39;diam&#39;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span> <span class="s1">&#39;dist_type&#39;</span><span class="p">:</span> <span class="s1">&#39;dpl&#39;</span><span class="p">},</span>
-    <span class="p">{</span><span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="s1">&#39;avg_k&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;diam&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s1">&#39;dist_type&#39;</span><span class="p">:</span> <span class="s1">&#39;poisson&#39;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">'n'</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>  <span class="s1">'avg_k'</span><span class="p">:</span> <span class="mf">3.5</span><span class="p">,</span> <span class="s1">'diam'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'dist_type'</span><span class="p">:</span> <span class="s1">'dgln'</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">'n'</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span> <span class="s1">'avg_k'</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s1">'diam'</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span> <span class="s1">'dist_type'</span><span class="p">:</span> <span class="s1">'dpl'</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">'n'</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="s1">'avg_k'</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s1">'diam'</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s1">'dist_type'</span><span class="p">:</span> <span class="s1">'poisson'</span><span class="p">},</span>
 <span class="p">]</span>
 <span class="n">connection_specs</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;k-stars&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="mf">0.174</span><span class="p">,</span> <span class="s1">&#39;gamma&#39;</span><span class="p">:</span> <span class="mf">4.15</span><span class="p">},</span>
-    <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;k-stars&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="mf">0.15</span><span class="p">,</span>  <span class="s1">&#39;gamma&#39;</span><span class="p">:</span> <span class="mf">4.15</span><span class="p">},</span>
+    <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="p">{</span><span class="s1">'type'</span><span class="p">:</span> <span class="s1">'k-stars'</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">:</span> <span class="mf">0.174</span><span class="p">,</span> <span class="s1">'gamma'</span><span class="p">:</span> <span class="mf">4.15</span><span class="p">},</span>
+    <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="p">{</span><span class="s1">'type'</span><span class="p">:</span> <span class="s1">'k-stars'</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">:</span> <span class="mf">0.15</span><span class="p">,</span>  <span class="s1">'gamma'</span><span class="p">:</span> <span class="mf">4.15</span><span class="p">},</span>
 <span class="p">}</span>
 
 <span class="n">config</span> <span class="o">=</span> <span class="n">InputConfigurator</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
@@ -266,9 +276,9 @@
 <span class="c1"># 2. Generate topology (CLC model)</span>
 <span class="n">gen</span> <span class="o">=</span> <span class="n">PowerGridGenerator</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
 <span class="n">grid</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate_grid</span><span class="p">(</span>
-    <span class="n">degrees_by_level</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;degrees_by_level&#39;</span><span class="p">],</span>
-    <span class="n">diameters_by_level</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;diameters_by_level&#39;</span><span class="p">],</span>
-    <span class="n">transformer_degrees</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;transformer_degrees&#39;</span><span class="p">],</span>
+    <span class="n">degrees_by_level</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">'degrees_by_level'</span><span class="p">],</span>
+    <span class="n">diameters_by_level</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">'diameters_by_level'</span><span class="p">],</span>
+    <span class="n">transformer_degrees</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">'transformer_degrees'</span><span class="p">],</span>
 <span class="p">)</span>
 
 <span class="c1"># 3. Assign bus types, generation/load, dispatch, and line parameters</span>
@@ -279,7 +289,7 @@
 <span class="n">TransmissionLineAllocator</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span><span class="o">.</span><span class="n">allocate</span><span class="p">()</span>
 
 <span class="c1"># 4. Visualize</span>
-<span class="n">GridVisualizer</span><span class="p">()</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="s1">&#39;yifan_hu&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Synthetic Grid&quot;</span><span class="p">)</span>
+<span class="n">GridVisualizer</span><span class="p">()</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="s1">'yifan_hu'</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Synthetic Grid"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>See the <a class="reference internal" href="examples/index.html"><span class="doc">Examples</span></a> for Jupyter notebooks covering each step in detail.</p>
@@ -294,19 +304,19 @@
 
 <span class="c1"># Mode I — fit parameters from a reference distribution network</span>
 <span class="n">feeders</span> <span class="o">=</span> <span class="n">synthesize_distribution</span><span class="p">(</span>
-    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;reference&quot;</span><span class="p">,</span>
-    <span class="n">reference_case</span><span class="o">=</span><span class="s2">&quot;cigre_lv&quot;</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">"reference"</span><span class="p">,</span>
+    <span class="n">reference_case</span><span class="o">=</span><span class="s2">"cigre_lv"</span><span class="p">,</span>
     <span class="n">n_feeders</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">n_nodes</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
     <span class="n">total_load_mw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
     <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
-    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;output&quot;</span><span class="p">,</span>
-    <span class="n">export_formats</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;json&quot;</span><span class="p">],</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">"output"</span><span class="p">,</span>
+    <span class="n">export_formats</span><span class="o">=</span><span class="p">[</span><span class="s2">"json"</span><span class="p">],</span>
 <span class="p">)</span>
 
 <span class="c1"># Mode II — use default Table III parameters (no reference needed)</span>
 <span class="n">feeders</span> <span class="o">=</span> <span class="n">synthesize_distribution</span><span class="p">(</span>
-    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">"default"</span><span class="p">,</span>
     <span class="n">n_feeders</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="n">n_nodes</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
     <span class="n">total_load_mw</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
@@ -316,6 +326,55 @@
 </div>
 <p>See <span class="xref std std-doc">examples/DistributionSynth.nblink</span> and <span class="xref std std-doc">examples/DistributionSynthFromRef.nblink</span> for detailed walkthroughs.</p>
 </section>
+</section>
+<section id="protecting-the-reference-grid">
+<h2>Protecting the Reference Grid<a class="headerlink" href="#protecting-the-reference-grid" title="Link to this heading"></a></h2>
+<p>In reference mode the synthesiser reads statistics from a real network. When
+that network is confidential, <code class="docutils literal notranslate"><span class="pre">perturbation_config</span></code> controls how much of it
+reaches the synthetic output. Each registered input is handled in one of three
+modes: <code class="docutils literal notranslate"><span class="pre">raw</span></code> (read and used unchanged), <code class="docutils literal notranslate"><span class="pre">perturb</span></code> (read and displaced by
+calibrated noise), or <code class="docutils literal notranslate"><span class="pre">off</span></code> (never reaches the output; a public value is used
+instead).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">powergrid_synth</span><span class="w"> </span><span class="kn">import</span> <span class="n">synthesize</span>
+
+<span class="n">grid</span> <span class="o">=</span> <span class="n">synthesize</span><span class="p">(</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">"reference"</span><span class="p">,</span>
+    <span class="n">reference_case</span><span class="o">=</span><span class="s2">"case118"</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+    <span class="n">perturbation_config</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"strength"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">"seed"</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>                      <span class="c1"># fix per release; see below</span>
+        <span class="s2">"parameters"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"degrees_by_level"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"mode"</span><span class="p">:</span> <span class="s2">"perturb"</span><span class="p">},</span>
+            <span class="s2">"node_count"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"mode"</span><span class="p">:</span> <span class="s2">"perturb"</span><span class="p">},</span>
+            <span class="s2">"base_kv_map"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"mode"</span><span class="p">:</span> <span class="s2">"off"</span><span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># What was protected, and what was not.</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s2">"perturbation_report"</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>A TOML file or a <code class="docutils literal notranslate"><span class="pre">PerturbationSettings</span></code> object works in place of the mapping;
+<code class="docutils literal notranslate"><span class="pre">perturbation.example.toml</span></code> in the repository root is a worked example. The
+same argument and the same file work for <code class="docutils literal notranslate"><span class="pre">synthesize_distribution()</span></code>.</p>
+<p><strong>Every parameter defaults to</strong> <code class="docutils literal notranslate"><span class="pre">raw</span></code>, so passing nothing reproduces the
+unprotected behaviour exactly.</p>
+<p>Every run writes an audit record — mode, strength, noise scale, resolved seed
+and any fallback, per parameter — next to the exported grid as
+<code class="docutils literal notranslate"><span class="pre">&lt;output_name&gt;_perturbation_report.json</span></code>. Retain it alongside a release.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Noise is drawn once per run, so pooling grids <em>within</em> one release cannot
+average it away. Publishing several batches from the same reference with
+fresh entropy breaks that property: fix the seed so every batch carries the
+identical offset.</p>
+</div>
+<p>Protection is evidenced by measurement, not by a theorem, and the measurements
+establish it for some parameters and not others. See <a class="reference internal" href="theory/perturbation.html"><span class="doc">Protecting the reference grid</span></a>
+for the mechanism, the threat model, the registered parameters, and how to
+measure recovery against your own reference.</p>
 </section>
 <section id="supported-data-formats-power-flow-solvers">
 <h2>Supported Data Formats &amp; Power-Flow Solvers<a class="headerlink" href="#supported-data-formats-power-flow-solvers" title="Link to this heading"></a></h2>

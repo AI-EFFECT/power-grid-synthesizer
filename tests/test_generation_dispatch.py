@@ -116,7 +116,7 @@ class TestGenerationDispatcher:
         assert all(0.0 <= p <= 100.0 + 1e-9 for p in result.values())
 
     def test_dispatch_balances_skewed_large_grid(self):
-        """Heavy-tailed capacities on a large grid (RTE7k-like) still balance.
+        """Heavy-tailed capacities on a large grid (thousands of buses) still balance.
 
         The uncommitted selection picks units near Uniform[0, 0.6] of the
         largest unit, which here are the few large units holding much of the

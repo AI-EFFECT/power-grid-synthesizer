@@ -31,10 +31,6 @@ control over individual pipeline stages.
      - |colab_gen|
    * - :doc:`IEEE Test <IEEETest.nblink>`
      - |colab_ieee|
-   * - :doc:`PEGASE 9241 Test <Pegase9241Test.nblink>`
-     - |colab_pegase|
-   * - :doc:`RTE 7000 Test <RTE7000Test.nblink>`
-     - |colab_rte7k|
    * - :doc:`Non-Reverse-Engineerability Study <NonReverseEngineerability>`
      -
 
@@ -51,12 +47,6 @@ control over individual pipeline stages.
 
 .. |colab_ieee| image:: https://colab.research.google.com/assets/colab-badge.svg
    :target: https://colab.research.google.com/github/TU-Delft-AI-Energy-Lab/grid-synthesizer/blob/main/examples/colab/ieee_test_colab.ipynb
-
-.. |colab_pegase| image:: https://colab.research.google.com/assets/colab-badge.svg
-   :target: https://colab.research.google.com/github/TU-Delft-AI-Energy-Lab/grid-synthesizer/blob/main/examples/colab/pegase9241_test_colab.ipynb
-
-.. |colab_rte7k| image:: https://colab.research.google.com/assets/colab-badge.svg
-   :target: https://colab.research.google.com/github/TU-Delft-AI-Energy-Lab/grid-synthesizer/blob/main/examples/colab/rte7k_from_source_file_colab.ipynb
 
 Here is a brief example showing how to configure the user input, and then generate, and visualize a synthetic power grid.
 

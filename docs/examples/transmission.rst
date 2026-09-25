@@ -15,6 +15,4 @@ control over individual pipeline stages.
    Generation and Load Settings <GenLoadSettings.nblink>
    Synthesis with pypowsybl <SynthesizePypowsybl.nblink>
    IEEE Test <IEEETest.nblink>
-   PEGASE 9241 Test <Pegase9241Test.nblink>
-   RTE 7000 Test <RTE7000Test.nblink>
    Non-Reverse-Engineerability Study <NonReverseEngineerability.nblink>

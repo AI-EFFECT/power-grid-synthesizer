@@ -165,8 +165,6 @@ Statistical parameters are stored in `reference_data.py` for reference systems (
 | `examples/transmission/BusTypeAssignment.ipynb` | AIS bus-type allocation | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/TU-Delft-AI-Energy-Lab/grid-synthesizer/blob/main/examples/colab/BusTypeAssignment_colab.ipynb) |
 | `examples/transmission/GenLoadSettings.ipynb` | Generation capacity and load allocation | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/TU-Delft-AI-Energy-Lab/grid-synthesizer/blob/main/examples/colab/GenLoadSettings_colab.ipynb) |
 | `examples/transmission/ieee_test.ipynb` | Validation against IEEE118 test cases | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/TU-Delft-AI-Energy-Lab/grid-synthesizer/blob/main/examples/colab/ieee_test_colab.ipynb) |
-| `examples/tranmission/pegase9241_test.ipynb` | Large-scale test | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/TU-Delft-AI-Energy-Lab/grid-synthesizer/blob/main/examples/colab/pegase9241_test_colab.ipynb) |
-| `examples/tranmission/rte7k_from_source_file.ipynb` | Large-scale test using RTE7000 data | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/TU-Delft-AI-Energy-Lab/grid-synthesizer/blob/main/examples/colab/rte7k_from_source_file_colab.ipynb) |
 
 ---
 
