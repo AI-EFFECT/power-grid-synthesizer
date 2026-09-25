@@ -6,8 +6,8 @@ This module implements the generation dispatch algorithm from
 It partitions generator units into three groups — **uncommitted**
 (:math:`\alpha = 0`), **partially committed** (:math:`0 < \alpha < 1`),
 and **fully committed** (:math:`\alpha \approx 1`) — then assigns
-participation factors (dispatch factors) and iteratively balances total
-generation against total load.  The dispatch factor is defined as
+participation factors (dispatch factors) and balances total generation
+against total load.  The dispatch factor is defined as
 
 .. math:: \alpha_i = P_{g_i} / P_{g_i}^{\max}, \qquad i = 1, \ldots, N_G
 
@@ -34,8 +34,9 @@ class GenerationDispatcher:
        distribution on capacity; dispatch factors assigned through a
        2-D bin-matching table ``Tab_2D_Pg`` (:math:`14 \times 10`).
     3. **Fully committed units** (remainder): :math:`\alpha = 1`.
-    4. **Balancing loop**: iteratively adjusts dispatch to match total
-       load within 1 % tolerance.
+    4. **Balancing**: switches whole units on or off until the load is
+       feasible, then scales the partially committed dispatch factors so
+       that total generation matches total load (see :meth:`_balance`).
 
     Parameters
     ----------
@@ -277,6 +278,121 @@ class GenerationDispatcher:
 
         return np.array(final_list) if final_list else np.array([])
 
+    @staticmethod
+    def _scale_committed_alphas(comm_units: np.ndarray, target_output: float) -> None:
+        r"""Scale positive committed dispatch factors to hit a target output.
+
+        Solves for a single factor :math:`s \ge 0` such that
+
+        .. math:: \sum_{\alpha_i < 0} \bar{P}_i \alpha_i
+                  + \sum_{\alpha_i > 0} \bar{P}_i \min(s \alpha_i, 1)
+                  = \text{target\_output}
+
+        by bisection (the left-hand side is monotone in :math:`s`).  Scaling
+        preserves the relative ordering of the dispatch factors drawn from
+        ``Tab_2D_Pg``; negative factors (reverse dispatch) are left as they
+        are.  If the target lies outside the achievable range, the factors are
+        set to the nearest bound (:math:`s = 0` or all positive :math:`\alpha = 1`).
+
+        Parameters
+        ----------
+        comm_units : numpy.ndarray, shape (m, 3)
+            ``[bus_id, normalised_capacity, alpha]``; modified in place.
+        target_output : float
+            Required normalised output of the committed group.
+        """
+        positive = comm_units[:, 2] > 0
+        caps = comm_units[positive, 1]
+        alphas = comm_units[positive, 2]
+        fixed_output = np.sum(comm_units[~positive, 1] * comm_units[~positive, 2])
+
+        def output_at(scale):
+            return fixed_output + np.sum(caps * np.minimum(alphas * scale, 1.0))
+
+        if len(alphas) == 0:
+            return
+        if target_output <= fixed_output:
+            comm_units[positive, 2] = 0.0
+            return
+
+        # At scale_hi every positive alpha is saturated at 1
+        scale_lo, scale_hi = 0.0, 1.0 / np.min(alphas)
+        if target_output >= output_at(scale_hi):
+            comm_units[positive, 2] = 1.0
+            return
+        for _ in range(100):
+            scale_mid = 0.5 * (scale_lo + scale_hi)
+            if output_at(scale_mid) < target_output:
+                scale_lo = scale_mid
+            else:
+                scale_hi = scale_mid
+        comm_units[positive, 2] = np.minimum(alphas * scale_hi, 1.0)
+
+    def _balance(self, uncomm_units: np.ndarray, comm_units: np.ndarray,
+                 full_units: np.ndarray, norm_total_load: float) -> None:
+        r"""Balance total generation against total load.
+
+        Works in normalised units and modifies the dispatch factors (column 2)
+        of the three groups in place:
+
+        1. **Excess**: while the fully committed units alone exceed the load,
+           switch off the largest of them (:math:`\alpha = 0`).
+        2. **Deficit**: while the committed plus fully committed capacity
+           cannot cover the load, switch on the largest uncommitted unit
+           (:math:`\alpha = 1`); units switched off in step 1 are used last.
+        3. **Scaling**: scale the partially committed dispatch factors so that
+           total generation matches the load exactly
+           (:meth:`_scale_committed_alphas`).
+
+        A warning is printed if the load cannot be met even with every unit
+        at full output, or if generation cannot be reduced to the load.
+
+        Parameters
+        ----------
+        uncomm_units, comm_units, full_units : numpy.ndarray, shape (m, 3)
+            ``[bus_id, normalised_capacity, alpha]`` for each group.
+        norm_total_load : float
+            Total load divided by :math:`P^{\max}_{g_{\max}}`.
+        """
+        def group_output(units):
+            return np.sum(units[:, 1] * units[:, 2]) if len(units) > 0 else 0.0
+
+        comm_capacity = np.sum(comm_units[:, 1]) if len(comm_units) > 0 else 0.0
+
+        # 1. Excess: switch off the largest fully committed units
+        switched_off_full = []
+        if len(full_units) > 0:
+            for idx in np.argsort(-full_units[:, 1]):
+                if group_output(full_units) <= norm_total_load:
+                    break
+                full_units[idx, 2] = 0.0
+                switched_off_full.append(idx)
+
+        # 2. Deficit: switch on uncommitted units (largest first), then any
+        #    fully committed units switched off in step 1 (smallest first)
+        switch_on_order = []
+        if len(uncomm_units) > 0:
+            switch_on_order += [(uncomm_units, idx) for idx in np.argsort(-uncomm_units[:, 1])]
+        switch_on_order += [(full_units, idx) for idx in reversed(switched_off_full)]
+        for units, idx in switch_on_order:
+            fixed_output = group_output(uncomm_units) + group_output(full_units)
+            if fixed_output + comm_capacity >= norm_total_load:
+                break
+            units[idx, 2] = 1.0
+
+        # 3. Scale the partially committed units to close the remaining gap
+        fixed_output = group_output(uncomm_units) + group_output(full_units)
+        if len(comm_units) > 0:
+            self._scale_committed_alphas(comm_units, norm_total_load - fixed_output)
+
+        total_output = fixed_output + group_output(comm_units)
+        mismatch = total_output - norm_total_load
+        if abs(mismatch) > 1e-6 * max(norm_total_load, 1e-12):
+            kind = "exceeds" if mismatch > 0 else "falls short of"
+            print(f"Warning: Generation dispatch {kind} total load by "
+                  f"{abs(mismatch) / max(norm_total_load, 1e-12):.1%}; "
+                  f"the slack bus will absorb the mismatch.")
+
     def dispatch(self) -> Dict[int, float]:
         r"""Run the full generation dispatch pipeline.
 
@@ -290,10 +406,9 @@ class GenerationDispatcher:
            (:math:`\alpha = 1`).
         3. Assign dispatch factors to partially committed units via
            the 2-D bin-matching table ``Tab_2D_Pg``.
-        4. Iteratively balance total generation against total load
-           (1 % tolerance, up to 50 iterations) by scaling committed
-           :math:`\alpha` values and toggling uncommitted / full-load
-           units on or off.
+        4. Balance total generation against total load by toggling
+           uncommitted / fully committed units on or off and scaling the
+           committed :math:`\alpha` values (:meth:`_balance`).
         5. Convert normalised dispatch back to MW:
            :math:`P_{g_i} = \alpha_i \cdot \bar{P}_{g_i}^{\max} \cdot P^{\max}_{g_{\max}}`.
 
@@ -336,84 +451,8 @@ class GenerationDispatcher:
             comm_units = np.array([])
             
         # 4. Balancing Logic
-        def calculate_current_total():
-            g_u = np.sum(uncomm_units[:, 1] * uncomm_units[:, 2]) if len(uncomm_units) > 0 else 0
-            g_c = np.sum(comm_units[:, 1] * comm_units[:, 2]) if len(comm_units) > 0 else 0
-            g_f = np.sum(full_units[:, 1] * full_units[:, 2]) if len(full_units) > 0 else 0
-            return g_u + g_c + g_f
+        self._balance(uncomm_units, comm_units, full_units, norm_total_load)
 
-        for _ in range(50): # Max Iterations
-            current_gen = calculate_current_total()
-            diff = current_gen - norm_total_load
-            
-            if abs(diff) < 0.01 * norm_total_load: # 1% Tolerance
-                break
-            
-            if diff > 0: # Excess Gen
-                # 1. Try scaling down committed units
-                if len(comm_units) > 0:
-                    comm_load = np.sum(comm_units[:, 1] * comm_units[:, 2])
-                    # We need to reduce by 'diff'. 
-                    # new_comm_load = comm_load - diff
-                    # ratio = new_comm_load / comm_load
-                    if comm_load > 1e-6:
-                        ratio = max(0, (comm_load - diff) / comm_load)
-                        # Don't drop too drastically in one step to keep stability
-                        ratio = max(ratio, 0.5) 
-                        comm_units[:, 2] *= ratio
-                        continue
-                
-                # 2. If committed scaling didn't help enough, turn off full units
-                if len(full_units) > 0:
-                    # Find ON units
-                    on_indices = np.where(full_units[:, 2] > 0.01)[0]
-                    if len(on_indices) > 0:
-                        # Turn off the largest one
-                        subset_idx = np.argmax(full_units[on_indices, 1])
-                        full_units[on_indices[subset_idx], 2] = 0.0
-                        continue
-                
-                # 3. Last resort: turn off committed units completely
-                if len(comm_units) > 0:
-                     on_indices = np.where(comm_units[:, 2] > 0.01)[0]
-                     if len(on_indices) > 0:
-                         comm_units[on_indices[0], 2] = 0.0
-            
-            else: # Deficit Gen (diff < 0)
-                # 1. Try scaling up committed units
-                if len(comm_units) > 0:
-                    comm_load = np.sum(comm_units[:, 1] * comm_units[:, 2])
-                    capacity = np.sum(comm_units[:, 1]) # Max possible if alpha=1
-                    headroom = capacity - comm_load
-                    
-                    if headroom > 1e-6:
-                        # We need to increase by abs(diff)
-                        # But we can't just multiply alphas linearly because they cap at 1.0
-                        # Simple heuristic: multiply by 1.1 or calculated ratio
-                        comm_units[:, 2] *= 1.1
-                        comm_units[:, 2] = np.minimum(comm_units[:, 2], 1.0)
-                        
-                        # If we actually gained something, continue
-                        new_load = np.sum(comm_units[:, 1] * comm_units[:, 2])
-                        if new_load > comm_load + 1e-6:
-                            continue
-
-                # 2. Turn on Uncommitted units
-                if len(uncomm_units) > 0:
-                    off_indices = np.where(uncomm_units[:, 2] < 0.01)[0]
-                    if len(off_indices) > 0:
-                        # Turn on largest available
-                        subset_idx = np.argmax(uncomm_units[off_indices, 1])
-                        uncomm_units[off_indices[subset_idx], 2] = 1.0 # Set to Full
-                        continue
-
-                # 3. Turn on any Full units that were turned off
-                if len(full_units) > 0:
-                    off_indices = np.where(full_units[:, 2] < 0.01)[0]
-                    if len(off_indices) > 0:
-                        full_units[off_indices[0], 2] = 1.0
-                        continue
-                        
         # 5. Result Export
         result = {}
         for group in [uncomm_units, comm_units, full_units]:

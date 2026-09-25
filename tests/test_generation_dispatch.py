@@ -108,6 +108,57 @@ class TestGenerationDispatcher:
         assert len(alphas) == 1
         assert alphas[0, 0] >= 0  # no negative dispatch for such a small set
 
+    def test_dispatch_balances_exactly(self, sample_grid):
+        """Generation matches load to numerical precision, not just within 1%."""
+        np.random.seed(0)
+        result = GenerationDispatcher(sample_grid).dispatch()
+        assert sum(result.values()) == pytest.approx(400.0, rel=1e-6)
+        assert all(0.0 <= p <= 100.0 + 1e-9 for p in result.values())
+
+    def test_dispatch_balances_skewed_large_grid(self):
+        """Heavy-tailed capacities on a large grid (RTE7k-like) still balance.
+
+        The uncommitted selection picks units near Uniform[0, 0.6] of the
+        largest unit, which here are the few large units holding much of the
+        capacity; balancing must switch them back on to meet the load.
+        """
+        rng = np.random.default_rng(1)
+        caps = np.concatenate([rng.lognormal(3.5, 1.0, 1900), rng.uniform(1000, 4800, 100)])
+        grid = nx.Graph()
+        for i, cap in enumerate(caps):
+            grid.add_node(i, bus_type='Gen', pg_max=float(cap))
+        total_load = 0.8 * caps.sum()
+        grid.add_node(len(caps), bus_type='Load', pl=float(total_load))
+
+        np.random.seed(0)
+        result = GenerationDispatcher(grid).dispatch()
+        assert sum(result.values()) == pytest.approx(total_load, rel=1e-6)
+        for bus, p in result.items():
+            assert p <= grid.nodes[bus]['pg_max'] + 1e-9
+
+    def test_dispatch_infeasible_load_warns(self, sample_grid, capsys):
+        """Load above total capacity: all units at full output and a warning."""
+        sample_grid.nodes[10]['pl'] = 1000.0
+        sample_grid.nodes[11]['pl'] = 1000.0
+        result = GenerationDispatcher(sample_grid).dispatch()
+        assert sum(result.values()) == pytest.approx(1000.0)
+        assert "falls short of total load" in capsys.readouterr().out
+
+    def test_dispatch_zero_load(self, sample_grid):
+        """No load: every unit is switched off."""
+        sample_grid.nodes[10]['pl'] = 0.0
+        sample_grid.nodes[11]['pl'] = 0.0
+        result = GenerationDispatcher(sample_grid).dispatch()
+        assert sum(result.values()) == pytest.approx(0.0, abs=1e-9)
+
+    def test_scale_committed_alphas_keeps_negative(self):
+        """Negative dispatch factors are kept; positive ones are scaled to the target."""
+        comm_units = np.array([[0, 1.0, 0.2], [1, 1.0, 0.4], [2, 0.5, -0.5]])
+        GenerationDispatcher._scale_committed_alphas(comm_units, 0.95)
+        assert comm_units[2, 2] == -0.5
+        assert np.sum(comm_units[:, 1] * comm_units[:, 2]) == pytest.approx(0.95)
+        assert np.all(comm_units[:2, 2] <= 1.0)
+
     def test_invalid_ref_sys_fallback(self):
         """Invalid ref_sys_id falls back to ref_sys_id=1 without error."""
         grid = nx.Graph()
