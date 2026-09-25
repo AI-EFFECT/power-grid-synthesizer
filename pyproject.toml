@@ -17,6 +17,8 @@ dependencies = [
     # tomllib entered the standard library in 3.11; tomli is the backport used
     # to read perturbation configuration files on 3.10.
     "tomli>=2.0; python_version < '3.11'",
+    "pandapower>=3.3.0",
+    "pypowsybl>=1.16.1",
 ]
 
 
@@ -43,7 +45,8 @@ full = [
 dev = [
     "pytest",
     "pytest-cov",
-    "build"
+    "build",
+    "jupyter>=1.1.1",
 ]
 
 [project.urls]
