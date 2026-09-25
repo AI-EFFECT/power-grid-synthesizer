@@ -152,6 +152,11 @@ both against your own reference before relying on a configuration:
 The estimators themselves live in :mod:`powergrid_synth.privacy.recovery` and
 can be called directly on any pool of generated graphs.
 
+The same study is available as a notebook,
+:doc:`Non-Reverse-Engineerability Study <../examples/NonReverseEngineerability>`,
+which walks through the configuration, the estimators and the recovery figure
+step by step and reproduces the script's numbers exactly.
+
 What the measurements establish, on IEEE-118 with thirty grids per
 configuration: buses per voltage level are displaced well beyond a pooling
 adversary's uncertainty, but only on levels holding few buses --- the noise is
