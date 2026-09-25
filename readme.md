@@ -260,7 +260,7 @@ feeder = DistributionGrid.from_nx(
 
 ---
 
-## Protecting the Reference Grid
+## Non-reverse-engineerability
 
 In reference mode the synthesiser reads statistics from a real network. When
 that network is confidential, `perturbation_config` controls how much of it

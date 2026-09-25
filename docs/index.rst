@@ -163,7 +163,7 @@ The high-level ``synthesize_distribution()`` function generates realistic radial
 See :doc:`examples/DistributionSynth.nblink` and :doc:`examples/DistributionSynthFromRef.nblink` for detailed walkthroughs.
 
 
-Protecting the Reference Grid
+Non-reverse-engineerability
 ------------------------------
 
 In reference mode the synthesiser reads statistics from a real network. When

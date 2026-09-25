@@ -1,5 +1,5 @@
 ##################################
-  Protecting the reference grid
+  Non-reverse-engineerability
 ##################################
 
 In reference mode the synthesiser reads statistics from a real network. When
