@@ -35,6 +35,8 @@ control over individual pipeline stages.
      - |colab_pegase|
    * - :doc:`RTE 7000 Test <RTE7000Test.nblink>`
      - |colab_rte7k|
+   * - :doc:`Non-Reverse-Engineerability Study <NonReverseEngineerability>`
+     -
 
 
 
